@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_app/Pages/HomePage.dart';
 import 'package:flutter_app/Pages/SignUpPage.dart';
 import "package:flutter/material.dart";
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../NetworkHandler.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -123,12 +124,18 @@ class _SignInPageState extends State<SignInPage> {
                           (route) => false);
                     }
                     else {
-                      String output = json.decode(response.body);
                       setState(() {
-                        validate = false;
-                        errorText = output;
                         circular = false;
                       });
+                      Fluttertoast.showToast(
+                          msg: "Please verify your credential ",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.CENTER,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0
+                      );
                     }
 
                     // login logic End here
