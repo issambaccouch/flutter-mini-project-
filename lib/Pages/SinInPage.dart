@@ -9,7 +9,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SignInPage extends StatefulWidget {
   SignInPage({Key key}) : super(key: key);
-
   @override
   _SignInPageState createState() => _SignInPageState();
 }
@@ -105,37 +104,32 @@ class _SignInPageState extends State<SignInPage> {
                     });
 
                     //Login Logic start here
-                    // Map<String, String> data = {
-                    //   "username": _usernameController.text,
-                    //   "password": _passwordController.text,
-                    // };
-                    // var response =
-                    //     await networkHandler.post("/user/login", data);
-
-                    // if (response.statusCode == 200 ||
-                    //     response.statusCode == 201) {
-                    //   Map<String, dynamic> output = json.decode(response.body);
-                    //   print(output["token"]);
-                    //   await storage.write(key: "token", value: output["token"]);
-                    //   setState(() {
-                    //     validate = true;
-                    //     circular = false;
-                    //   });
+                    Map<String, String> data = {
+                      "email": _usernameController.text,
+                      "password": _passwordController.text,
+                    };
+                    var response =
+                        await  networkHandler.login(data["email"],data["password"]);
+                    if (response.statusCode == 200 || response.statusCode == 201) {
+                      setState(() {
+                        validate = true;
+                        circular = false;
+                      });
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
                             builder: (context) => HomePage(),
                           ),
                           (route) => false);
-                    // }
-                    // else {
-                    //   String output = json.decode(response.body);
-                    //   setState(() {
-                    //     validate = false;
-                    //     errorText = output;
-                    //     circular = false;
-                    //   });
-                    // }
+                    }
+                    else {
+                      String output = json.decode(response.body);
+                      setState(() {
+                        validate = false;
+                        errorText = output;
+                        circular = false;
+                      });
+                    }
 
                     // login logic End here
                   },
