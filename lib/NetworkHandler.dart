@@ -1,39 +1,58 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app/sharedPref.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NetworkHandler {
   String baseurl = "http://10.0.2.2:3000/petrescue";
   var log = Logger();
-  FlutterSecureStorage storage = FlutterSecureStorage();
 
   Future get(String url) async {
-    url = formater(url);
-    // /user/register
-    var response = await http.get(
-      url
-    );
+    var response = await http.get(url);
     if (response.statusCode == 200 || response.statusCode == 201) {
       log.i(response.body);
 
       return json.decode(response.body);
     }
-    log.i(response.body);
-    log.i(response.statusCode);
+
   }
-  Future login(email , password) async {
-    log.i(email , password);
+  Future <http.Response>login(email , password) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
+
     final response = await http.get("$baseurl/user/$email/$password");
-    log.i(response.body);
-    log.i(response.statusCode);
-
-      return response ;
+    if(response.statusCode == 200 || response.statusCode == 201 ){
+      var jsonData =  json.decode(response.body);
+      sharedPreferences.setString('user_email', jsonData[0]["user_email"]);
+      sharedPreferences.setString('user_username', jsonData[0]["user_username"]);
+      var test = sharedPreferences.getString("user_email");
+   log.i(test);
     }
+    return response ;
+    }
+  Future <http.Response> register(username ,email ,password) async {
+   var url = "$baseurl/signup" ;
+   log.i(url) ;
+    var response = await http.post(
+     url,
+      headers: <String, String>{
+        "Content-type": "application/json;charset=UTF-8",
+      },
+      body: json.encode(<String , String>{
+          'user_username':username,
+          'user_email':email,
+          'password':password
+
+      }
 
 
+      ),
+    );
+    return response;
+  }
 
   Future<http.Response> post(String url, Map<String, String> body) async {
     url = formater(url);

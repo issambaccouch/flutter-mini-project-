@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import "package:flutter/material.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../NetworkHandler.dart';
 import 'HomePage.dart';
@@ -66,8 +67,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   setState(() {
                     circular = true;
                   });
-                  await checkUser();
-                  if (_globalkey.currentState.validate() && validate) {
+                  if (_globalkey.currentState.validate()) {
                     // we will send the data to rest server
                     Map<String, String> data = {
                       "username": _usernameController.text,
@@ -76,25 +76,20 @@ class _SignUpPageState extends State<SignUpPage> {
                     };
                     print(data);
                     var responseRegister =
-                        await networkHandler.post("/user/register", data);
+                    await networkHandler.register(data["username"],data["email"],data["password"]);
 
                     //Login Logic added here
                     if (responseRegister.statusCode == 200 ||
                         responseRegister.statusCode == 201) {
                       Map<String, String> data = {
-                        "username": _usernameController.text,
+                        "email": _emailController.text,
                         "password": _passwordController.text,
                       };
                       var response =
-                          await networkHandler.post("/user/login", data);
+                      await networkHandler.login(data["email"],data["password"]);
 
                       if (response.statusCode == 200 ||
                           response.statusCode == 201) {
-                        Map<String, dynamic> output =
-                            json.decode(response.body);
-                        print(output["token"]);
-                        await storage.write(
-                            key: "token", value: output["token"]);
                         setState(() {
                           validate = true;
                           circular = false;
@@ -109,6 +104,16 @@ class _SignUpPageState extends State<SignUpPage> {
                         Scaffold.of(context).showSnackBar(
                             SnackBar(content: Text("Netwok Error")));
                       }
+                    } else if (responseRegister.statusCode == 500){
+                      Fluttertoast.showToast(
+                          msg: "Email or username already token",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.CENTER,
+                          timeInSecForIosWeb: 1,
+                          backgroundColor: Colors.red,
+                          textColor: Colors.white,
+                          fontSize: 16.0
+                      );
                     }
 
                     //Login Logic end here
@@ -150,30 +155,7 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  checkUser() async {
-    if (_usernameController.text.length == 0) {
-      setState(() {
-        // circular = false;
-        validate = false;
-        errorText = "Username Can't be empty";
-      });
-    } else {
-      var response = await networkHandler
-          .get("/user/checkUsername/${_usernameController.text}");
-      if (response['Status']) {
-        setState(() {
-          // circular = false;
-          validate = false;
-          errorText = "Username already taken";
-        });
-      } else {
-        setState(() {
-          // circular = false;
-          validate = true;
-        });
-      }
-    }
-  }
+
 
   Widget usernameTextField() {
     return Padding(

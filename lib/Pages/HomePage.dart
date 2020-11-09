@@ -5,6 +5,7 @@ import 'package:flutter_app/Profile/ProfileScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_app/NetworkHandler.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -38,15 +39,16 @@ class _HomePageState extends State<HomePage> {
   }
 
   void checkProfile() async {
-    var response = await networkHandler.get("/profile/checkProfile");
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
+    var username = sharedPreferences.getString("user_username");
     setState(() {
-      username = response['username'];
+      username = username;
     });
-    if (response["status"] == true) {
+    if (username != null ) {
       setState(() {
         profilePhoto = CircleAvatar(
           radius: 50,
-          backgroundImage: NetworkHandler().getImage(response['username']),
+          backgroundImage: NetworkImage('https://cdnb.artstation.com/p/assets/images/images/015/774/565/large/basma-shaaban-c3499476007843-5c5cad115bc79.jpg?1549581474') ,
         );
       });
     } else {

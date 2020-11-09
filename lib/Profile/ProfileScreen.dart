@@ -1,6 +1,7 @@
 import 'package:flutter_app/NetworkHandler.dart';
 import 'package:flutter_app/Profile/CreatProfile.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'MainProfile.dart';
 
@@ -22,8 +23,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void checkProfile() async {
-    var response = await networkHandler.get("/profile/checkProfile");
-    if (response["status"] == true) {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
+    var username = sharedPreferences.getString("user_username");
+    if (username != null) {
       setState(() {
         page = MainProfile();
       });

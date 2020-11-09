@@ -4,19 +4,12 @@ part 'profileModel.g.dart';
 
 @JsonSerializable()
 class ProfileModel {
-  String name;
-  String username;
-  String profession;
-  String DOB;
-  String titleline;
-  String about;
+  String user_email;
+  String user_username;
   ProfileModel(
-      {this.DOB,
-      this.about,
-      this.name,
-      this.profession,
-      this.titleline,
-      this.username});
+      {this.user_username,
+      this.user_email
+   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) =>
       _$ProfileModelFromJson(json);
