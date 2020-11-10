@@ -3,9 +3,11 @@ import 'package:flutter_app/Pages/WelcomePage.dart';
 import 'package:flutter_app/Screen/HomeScreen.dart';
 import 'package:flutter_app/Profile/ProfileScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/UI/principal.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_app/NetworkHandler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logger/logger.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -15,8 +17,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var log = Logger();
   int currentState = 0;
-  List<Widget> widgets = [HomeScreen(), ProfileScreen()];
+  List<Widget> widgets = [Principal(), ProfileScreen()];
   List<String> titleString = ["Home Page", "Profile Page"];
   final storage = FlutterSecureStorage();
   NetworkHandler networkHandler = NetworkHandler();
@@ -40,7 +43,8 @@ class _HomePageState extends State<HomePage> {
 
   void checkProfile() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
-    var username = sharedPreferences.getString("user_username");
+     username = sharedPreferences.getString("user_username");
+     log.i(username);
     setState(() {
       username = username;
     });
