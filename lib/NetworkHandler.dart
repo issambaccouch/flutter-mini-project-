@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class NetworkHandler {
   String baseurl = "http://10.0.2.2:3000/petrescue";
-  var log = Logger();
+    var log = Logger();
 
   Future get(String url) async {
     var response = await http.get(url);
@@ -28,8 +28,7 @@ class NetworkHandler {
       var jsonData =  json.decode(response.body);
       sharedPreferences.setString('user_email', jsonData[0]["user_email"]);
       sharedPreferences.setString('user_username', jsonData[0]["user_username"]);
-      var test = sharedPreferences.getString("user_email");
-   log.i(test);
+      sharedPreferences.setInt('user_id', jsonData[0]["user_id"]);
     }
     return response ;
     }
@@ -49,6 +48,31 @@ class NetworkHandler {
       }
 
 
+      ),
+    );
+    return response;
+  }
+
+  Future <http.Response> addpet(pet_name ,pet_race ,pet_age,pet_status,pet_desc,pet_sex) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
+    var owner = sharedPreferences.getInt("user_id");
+
+    var url = "$baseurl/mypets" ;
+    log.i(url) ;
+    var response = await http.post(
+      url,
+      headers: <String, String>{
+        "Content-type": "application/json;charset=UTF-8",
+      },
+      body: json.encode(<String , dynamic>{
+        'pet_name':pet_name,
+        'pet_race':pet_race,
+        'pet_age':pet_age,
+        'pet_status':pet_status,
+        'pet_desc':pet_desc,
+        'pet_sex':pet_sex,
+        'owner':owner
+      }
       ),
     );
     return response;
