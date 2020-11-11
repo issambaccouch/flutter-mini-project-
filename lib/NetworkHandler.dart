@@ -53,7 +53,7 @@ class NetworkHandler {
     return response;
   }
 
-  Future <http.Response> addpet(pet_name ,pet_race ,pet_age,pet_status,pet_desc,pet_sex) async {
+  Future <http.Response> addpet(pet_name ,pet_race ,pet_age,pet_status,pet_desc,pet_sex,pet_picture) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
     var owner = sharedPreferences.getInt("user_id");
 
@@ -71,6 +71,7 @@ class NetworkHandler {
         'pet_status':pet_status,
         'pet_desc':pet_desc,
         'pet_sex':pet_sex,
+        "pet_picture":pet_picture,
         'owner':owner
       }
       ),
@@ -79,7 +80,7 @@ class NetworkHandler {
   }
 
   Future<http.Response> post(String url, Map<String, String> body) async {
-    url = formater(url);
+    url = (url);
     log.d(body);
     var response = await http.post(
       url,
@@ -91,10 +92,9 @@ class NetworkHandler {
     return response;
   }
 
-  Future<http.StreamedResponse> patchImage(String url, String filepath) async {
-    url = formater(url);
-    var request = http.MultipartRequest('PATCH', Uri.parse(url));
-    request.files.add(await http.MultipartFile.fromPath("img", filepath));
+  Future<http.StreamedResponse> addImage(String url, String filepath) async {
+    var request = http.MultipartRequest('POST', Uri.parse(url));
+    request.files.add(await http.MultipartFile.fromPath("avatar", filepath));
     request.headers.addAll({
       "Content-type": "multipart/form-data",
     });
@@ -102,12 +102,9 @@ class NetworkHandler {
     return response;
   }
 
-  String formater(String url) {
-    return baseurl + url;
-  }
 
   NetworkImage getImage(String username) {
-    String url = formater("/uploads//$username.jpg");
+    String url = ("/uploads//$username.jpg");
     return NetworkImage(url);
   }
 }

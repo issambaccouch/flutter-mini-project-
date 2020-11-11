@@ -1,4 +1,4 @@
-import 'package:flutter_app/Blog/addBlog.dart';
+import 'package:flutter_app/Blog/addPet.dart';
 import 'package:flutter_app/Pages/WelcomePage.dart';
 import 'package:flutter_app/Screen/HomeScreen.dart';
 import 'package:flutter_app/Profile/ProfileScreen.dart';
@@ -127,7 +127,7 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.teal,
         onPressed: () {
           Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => AddBlog()));
+              .push(MaterialPageRoute(builder: (context) => AddPet()));
         },
         child: Text(
           "+",

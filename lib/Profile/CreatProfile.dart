@@ -74,7 +74,7 @@ class _CreatProfileState extends State<CreatProfile> {
                   if (response.statusCode == 200 ||
                       response.statusCode == 201) {
                     if (_imageFile.path != null) {
-                      var imageResponse = await networkHandler.patchImage(
+                      var imageResponse = await networkHandler.addImage(
                           "/profile/add/image", _imageFile.path);
                       if (imageResponse.statusCode == 200) {
                         setState(() {

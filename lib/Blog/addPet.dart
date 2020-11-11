@@ -3,21 +3,29 @@ import 'package:flutter_app/NetworkHandler.dart';
 import 'package:flutter_app/Pages/HomePage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:logger/logger.dart';
 import 'package:smart_select/smart_select.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
 
-class AddBlog extends StatefulWidget {
-  AddBlog({Key key}) : super(key: key);
+
+class AddPet extends StatefulWidget {
+  AddPet({Key key}) : super(key: key);
 
   @override
-  _AddBlogState createState() => _AddBlogState();
+  _AddPetState createState() => _AddPetState();
 }
 
-class _AddBlogState extends State<AddBlog> {
+class _AddPetState extends State<AddPet> {
+  var log = Logger();
+  final String nodejsendPoint = 'http://10.0.2.2:3000/petrescue/pet/upload';
   TextEditingController _petameController = TextEditingController();
   TextEditingController _petageController = TextEditingController();
   TextEditingController _petdescController = TextEditingController();
-
+  File _image;
   String _race = '' ;
   String _sex = '' ;
   String _status = '' ;
@@ -37,7 +45,6 @@ class _AddBlogState extends State<AddBlog> {
     S2Choice<String>(value: 'lost', title: 'Lost'),
     S2Choice<String>(value: 'adoption', title: 'Adoption'),
   ];
-
 
   NetworkHandler nh = NetworkHandler();
   final _globalkey = GlobalKey<FormState>();
@@ -95,43 +102,46 @@ class _AddBlogState extends State<AddBlog> {
 
   Widget titleTextField() {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 10,
-      ),
-      child: TextFormField(
-        controller: _title,
-        // validator: (value) {
-        //   if (value.isEmpty) {
-        //     return "Title can't be empty";
-        //   } else if (value.length > 100) {
-        //     return "Title length should be <=100";
-        //   }
-        //   return null;
-        // },
-        decoration: InputDecoration(
-          border: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.teal,
-            ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10, ),
+      child: Column(
+        children: <Widget>[
+          SizedBox(
+            height: 10,
           ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: Colors.orange,
-              width: 2,
+          Center(
+            child: GestureDetector(
+              onTap: () {
+                _showPicker(context);
+              },
+              child: CircleAvatar(
+                radius: 55,
+                backgroundColor: Color(0xffFDCF09),
+                child: _image != null
+                    ? ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.file(
+                    _image,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.fitHeight,
+                  ),
+                )
+                    : Container(
+                  decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(50)),
+                  width: 100,
+                  height: 100,
+                  child: Icon(
+                    Icons.camera_alt,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ),
             ),
-          ),
-          labelText: "Add Image and Title",
-          prefixIcon: IconButton(
-            icon: Icon(
-              iconphoto,
-              color: Colors.teal,
-            ),
-            onPressed: takeCoverPhoto,
-          ),
-        ),
-        maxLines: 3,
-      ),
+          )
+        ],
+    ),
     );
   }
   Widget pet_nameTextField() {
@@ -322,27 +332,42 @@ class _AddBlogState extends State<AddBlog> {
   Widget addButton() {
     return InkWell(
       onTap: () async {
-        Map<String, String> data = {
-          "pet_name": _petameController.text,
-          "pet_age":  _petageController.text,
-          "pet_desc": _petdescController.text,
-          "pet_race": _race,
-          "pet_sex": _sex,
-          "pet_status": _status,
-        };
-        var response =
-        await  nh.addpet(data["pet_name"], data["pet_race"], data["pet_age"], data["pet_status"], data["pet_desc"], data["pet_sex"]);
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomePage(),
-              ),
-                  (route) => false);
-        }
-        else {
+        if (_globalkey.currentState.validate() && _sex != "" && _race != ""&& _status != "" && _image !=  null ) {
+          Map<String, String> data = {
+            "pet_name": _petameController.text,
+            "pet_age": _petageController.text,
+            "pet_desc": _petdescController.text,
+            "pet_race": _race,
+            "pet_sex": _sex,
+            "pet_status": _status,
+            "pet_picture": _image.path.split("/").last
+          };
+          var response =
+          await nh.addpet(data["pet_name"], data["pet_race"], data["pet_age"],
+              data["pet_status"], data["pet_desc"], data["pet_sex"],data["pet_picture"]);
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            nh.addImage(nodejsendPoint, _image.path) ;
+            log.i(_image.path);
+            nh.addImage(nodejsendPoint, _image.path) ;
+            Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(),
+                ),
+                    (route) => false);
+            Fluttertoast.showToast(
+                msg: "Pet Added",
+                toastLength: Toast.LENGTH_LONG,
+                gravity: ToastGravity.BOTTOM,
+                timeInSecForIosWeb: 1,
+                backgroundColor: Colors.green,
+                textColor: Colors.white,
+                fontSize: 16.0
+            );
+          }
+        } else {
           Fluttertoast.showToast(
-              msg: "Please verify your informations ",
+              msg: "Please fill all the fields ",
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.CENTER,
               timeInSecForIosWeb: 1,
@@ -368,12 +393,71 @@ class _AddBlogState extends State<AddBlog> {
       ),
     );
   }
+  void _upload()  {
+    if (_image == null) return;
+    log.i(_image);
+    http.post(nodejsendPoint, body: {
+      "avatar":  _image,
+    }).then((res) {
+      print(res.statusCode);
+    }).catchError((err) {
+      print(err);
+    });
+  }
+  _imgFromCamera() async {
+    File image = await ImagePicker.pickImage(
+        source: ImageSource.camera, imageQuality: 50
+    );
 
+    setState(() {
+      _image = image;
+    });
+  }
+
+  _imgFromGallery() async {
+    File image = await  ImagePicker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50
+    );
+
+    setState(() {
+      _image = image;
+    });
+  }
   void takeCoverPhoto() async {
     final coverPhoto = await _picker.getImage(source: ImageSource.gallery);
     setState(() {
       _imageFile = coverPhoto;
       iconphoto = Icons.check_box;
     });
+  }
+  void _showPicker(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Photo Library'),
+                      onTap: () {
+                        _imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  new ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () {
+                      _imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+    );
   }
 }
