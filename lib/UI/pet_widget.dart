@@ -3,6 +3,7 @@ import 'package:flutter_app/UI/data.dart';
 import 'package:flutter_app/UI/pet_detail.dart';
 
 class PetWidget extends StatelessWidget {
+  var imageUrl = "http://10.0.2.2:3000/petrescue/public/img/";
 
   final Pet pet;
   final int index;
@@ -41,11 +42,11 @@ class PetWidget extends StatelessWidget {
                 children: [
 
                   Hero(
-                    tag: pet.imageUrl,
+                    tag: pet.pet_picture,
                     child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage(pet.imageUrl),
+                          image: NetworkImage(imageUrl+pet.pet_picture),
                           fit: BoxFit.cover,
                         ),
                         borderRadius: BorderRadius.only(
@@ -65,12 +66,12 @@ class PetWidget extends StatelessWidget {
                         width: 30,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: pet.favorite ? Colors.red[400] : Colors.white,
+                          color:  Colors.red[400] ,
                         ),
                         child: Icon(
                           Icons.favorite,
                           size: 16,
-                          color: pet.favorite ? Colors.white : Colors.grey[300],
+                          color: Colors.white ,
                         ),
                       ),
                     ),
@@ -88,16 +89,16 @@ class PetWidget extends StatelessWidget {
 
                   Container(
                     decoration: BoxDecoration(
-                      color: pet.condition == "Adoption" ? Colors.orange[100] : pet.condition == "Disappear" ? Colors.red[100] : Colors.blue[100],
+                      color: pet.pet_status == "Adoption" ? Colors.orange[100] : pet.pet_status == "Lost" ? Colors.red[100] : Colors.blue[100],
                       borderRadius: BorderRadius.all(
                         Radius.circular(10),
                       ),
                     ),
                     padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     child: Text(
-                      pet.condition,
+                      pet.pet_status,
                       style: TextStyle(
-                        color: pet.condition == "Adoption" ? Colors.orange : pet.condition == "Disappear" ? Colors.red : Colors.blue,
+                        color: pet.pet_status == "Adoption" ? Colors.orange : pet.pet_status == "Lost" ? Colors.red : Colors.blue,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
@@ -109,7 +110,7 @@ class PetWidget extends StatelessWidget {
                   ),
 
                   Text(
-                    pet.name,
+                    pet.pet_name,
                     style: TextStyle(
                       color: Colors.grey[800],
                       fontSize: 18,
@@ -135,7 +136,7 @@ class PetWidget extends StatelessWidget {
                       ),
 
                       Text(
-                        pet.location,
+                        pet.createdAt.substring(0,10),
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,
@@ -147,7 +148,7 @@ class PetWidget extends StatelessWidget {
                       ),
 
                       Text(
-                        "(" + pet.distance + "km)",
+                        "(" + pet.pet_race + ")",
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,

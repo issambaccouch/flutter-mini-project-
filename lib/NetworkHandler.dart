@@ -20,6 +20,19 @@ class NetworkHandler {
     }
 
   }
+
+  Future getUser(user_id)   {
+   var url  = "http://10.0.2.2:3000/petrescue/user/$user_id";
+    return http.get(url) ;
+    }
+
+
+
+   Future getPets() {
+    var url = "http://10.0.2.2:3000/petrescue/pets";
+    return http.get(url);
+  }
+
   Future <http.Response>login(email , password) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
 

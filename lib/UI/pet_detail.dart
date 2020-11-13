@@ -1,13 +1,42 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Model/profileModel.dart';
+import 'package:flutter_app/Model/user.dart';
 import 'package:flutter_app/UI/data.dart';
 import 'package:flutter_app/UI/user_avatar.dart';
+import 'package:http/http.dart' as http;
 
-class PetDetail extends StatelessWidget {
+import '../NetworkHandler.dart';
+
+class PetDetail extends StatefulWidget {
 
   final Pet pet;
-
   PetDetail({@required this.pet});
+  @override
+  _PetDetailState createState() => _PetDetailState(pet);
 
+}
+class _PetDetailState extends State<PetDetail> {
+
+  final Pet pet;
+  _PetDetailState(this.pet);
+  NetworkHandler networkHandler = NetworkHandler();
+   var imageUrl = "http://10.0.2.2:3000/petrescue/public/img/";
+    var user = [] ;
+  _getUser() {
+    networkHandler.getUser(pet.owner).then((response) {
+      setState(() {
+      var   res =  jsonDecode(response.body);
+        user =  res.map((model) => User.fromJson(model)).toList();
+      });
+    });
+  }
+  initState() {
+    super.initState();
+    _getUser();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,11 +74,11 @@ class PetDetail extends StatelessWidget {
               children: [
 
                 Hero(
-                  tag: pet.imageUrl,
+                  tag: pet.pet_picture,
                   child: Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage(pet.imageUrl),
+                        image: NetworkImage("$imageUrl/"+pet.pet_picture),
                         fit: BoxFit.cover,
                       ),
                       borderRadius: BorderRadius.only(
@@ -81,7 +110,7 @@ class PetDetail extends StatelessWidget {
                         children: [
 
                           Text(
-                            pet.name,
+                            pet.pet_name,
                             style: TextStyle(
                               color: Colors.grey[800],
                               fontWeight: FontWeight.bold,
@@ -107,7 +136,7 @@ class PetDetail extends StatelessWidget {
                               ),
 
                               Text(
-                                pet.location,
+                                pet.createdAt,
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -119,7 +148,7 @@ class PetDetail extends StatelessWidget {
                               ),
 
                               Text(
-                                "(" + pet.distance + "km)",
+                                "(" + pet.pet_status + ")",
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -138,12 +167,14 @@ class PetDetail extends StatelessWidget {
                         width: 50,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: pet.favorite ? Colors.red[400] : Colors.white,
+                          color: Colors.red[400],
+                          // color: pet.favorite ? Colors.red[400] : Colors.white,
                         ),
                         child: Icon(
                           Icons.favorite,
                           size: 24,
-                          color: pet.favorite ? Colors.white : Colors.grey[300],
+                          color: Colors.white,
+                          // color: pet.favorite ? Colors.white : Colors.grey[300],
                         ),
                       ),
 
@@ -156,9 +187,9 @@ class PetDetail extends StatelessWidget {
                   child: Row(
                     children: [
 
-                      buildPetFeature("4 months", "Age"),
-                      buildPetFeature("Grey", "Color"),
-                      buildPetFeature("11 Kg", "Weight"),
+                      buildPetFeature(pet.pet_age, "Age"),
+                      buildPetFeature(pet.pet_sex, "Gender"),
+                      buildPetFeature(pet.pet_race, "Race"),
 
                     ],
                   ),
@@ -183,7 +214,7 @@ class PetDetail extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
-                    "Maine Coon cats are known for their intelligence and playfulness, as well as their size. One of the largest breeds of domestic cats, they are lovingly referreds.",
+                    pet.pet_desc,
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 14,
@@ -228,7 +259,7 @@ class PetDetail extends StatelessWidget {
                               ),
 
                               Text(
-                                "Nannie Barker",
+                               user[0].user_username,
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -324,5 +355,7 @@ class PetDetail extends StatelessWidget {
       ),
     );
   }
+
+
 
 }

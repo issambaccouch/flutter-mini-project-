@@ -4,11 +4,14 @@ import 'package:flutter_app/UI/pet_widget.dart';
 
 class CategoryList extends StatelessWidget {
 
-  final Category category;
+String category ;
+ List<Pet>pets ;
 
-  CategoryList({@required this.category});
+  CategoryList({@required this.category,this.pets});
+  var selected = true ;
 
-   @override
+
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -18,7 +21,7 @@ class CategoryList extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          (category == Category.HAMSTER ? "Hamster" : category == Category.CAT ? "Cat" : category == Category.BUNNY ? "Bunny" : "Dog") + " Category",
+          (category == "HAMSTER" ? "Hamster" : category == "CAT" ? "Cat" : category == "BUNNY" ? "Bunny" : "Dog") + " Category",
           style: TextStyle(
             color: Colors.grey[800],
           ),
@@ -51,10 +54,8 @@ class CategoryList extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-
-                buildFilter("Mating", false),
-                buildFilter("Adoption", true),
-                buildFilter("Disappear", true),
+                buildFilter("Adoption", selected),
+                buildFilter("Disappear", selected),
 
               ],
             ),
@@ -68,7 +69,7 @@ class CategoryList extends StatelessWidget {
                 childAspectRatio: 1 / 1.55,
                 crossAxisCount: 2,
                 crossAxisSpacing: 15,
-                children: getPetList().where((i) => i.category == category).map((item) {
+                children: pets.where((i) => i.pet_race.toUpperCase() == category).map((item) {
                   return PetWidget(
                     pet: item,
                     index: null,
@@ -83,13 +84,15 @@ class CategoryList extends StatelessWidget {
     );
   }
 
-  Widget buildFilter(String name, bool selected){
-    return Container(
+  Widget buildFilter(String name, bool selected) {
+    return InkWell(child: Container(
       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.all(
           Radius.circular(20),
+
         ),
+
         border: Border.all(
           width: 1,
           color: selected ? Colors.transparent : Colors.grey[300],
@@ -115,8 +118,8 @@ class CategoryList extends StatelessWidget {
             ),
           ),
 
-          selected 
-          ? Row(
+          selected
+              ? Row(
             children: [
 
               SizedBox(
@@ -131,9 +134,26 @@ class CategoryList extends StatelessWidget {
 
             ],
           )
-          : Container(),
+              : Container(),
         ],
       ),
+    ),
+      onTap: () {
+        changeStatus(this.selected);
+        print(this.selected) ;
+        Container();
+      },
     );
   }
+
+
+void changeStatus(selected) {
+  if (selected == true) {
+    this.selected = false;
+  }else {
+    this.selected = true;
+  }
+
+}
+
 }

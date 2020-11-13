@@ -1,7 +1,12 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_app/NetworkHandler.dart';
 import 'package:flutter_app/UI/data.dart';
 import 'package:flutter_app/UI/pet_widget.dart';
 import 'package:flutter_app/UI/category_list.dart';
+import 'package:logger/logger.dart';
 
 class Principal extends StatefulWidget {
   @override
@@ -9,8 +14,22 @@ class Principal extends StatefulWidget {
 }
 
 class _PrincipalState extends State<Principal> {
+  var log = Logger();
 
-  List<Pet> pets = getPetList();
+  NetworkHandler networkHandler = NetworkHandler();
+  var pets = new List<Pet>();
+  _getPets() {
+    networkHandler.getPets().then((response) {
+      setState(() {
+        Iterable res =  json.decode(response.body);
+        pets = res.map((model) => Pet.fromJson(model)).toList();
+      });
+    });
+  }
+  initState() {
+    super.initState();
+    _getPets();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,15 +123,15 @@ class _PrincipalState extends State<Principal> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      buildPetCategory(Category.HAMSTER, "56", Colors.orange[200]),
-                      buildPetCategory(Category.CAT, "210", Colors.blue[200]),
+                      buildPetCategory("HAMSTER", "56", Colors.orange[200],pets),
+                      buildPetCategory("CAT", "210", Colors.blue[200],pets),
                     ],
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      buildPetCategory(Category.BUNNY, "90", Colors.green[200]),
-                      buildPetCategory(Category.DOG, "340", Colors.red[200]),
+                      buildPetCategory("BUNNY", "90", Colors.green[200],pets),
+                      buildPetCategory("DOG", "340", Colors.red[200],pets),
                     ],
                   ),
                 ],
@@ -196,13 +215,13 @@ class _PrincipalState extends State<Principal> {
     );
   }
 
-  Widget buildPetCategory(Category category, String total, Color color){
+  Widget buildPetCategory(String category, String total, Color color,List<Pet> pets){
     return Expanded(
       child: GestureDetector(
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CategoryList(category: category)),
+            MaterialPageRoute(builder: (context) => CategoryList(category: category,pets: pets)),
           );
         },
         child: Container(
@@ -233,7 +252,7 @@ class _PrincipalState extends State<Principal> {
                     height: 30,
                     width: 30,
                     child: Image.asset(
-                      "assets/images/" + (category == Category.HAMSTER ? "hamster" : category == Category.CAT ? "cat" : category == Category.BUNNY ? "bunny" : "dog") + ".png",
+                      "assets/images/" + (category == "HAMSTER" ? "hamster" : category == "CAT" ? "cat" : category == "BUNNY" ? "bunny" : "dog") + ".png",
                       fit: BoxFit.fitHeight,
                     ),
                   ),
@@ -250,7 +269,7 @@ class _PrincipalState extends State<Principal> {
                 children: [
 
                   Text(
-                    category == Category.HAMSTER ? "Hamsters" : category == Category.CAT ? "Cats" : category == Category.BUNNY ? "Bunnies" : "Dogs",
+                    category == "HAMSTER" ? "Hamsters" : category == "CAT" ? "Cats" : category == "BUNNY" ? "Bunnies" : "Dogs",
                     style: TextStyle(
                       color: Colors.grey[800],
                       fontSize: 16,
@@ -279,15 +298,15 @@ class _PrincipalState extends State<Principal> {
   List<Widget> buildNewestPet(){
     List<Widget> list = [];
     for (var i = 0; i < pets.length; i++) {
-      if(pets[i].newest){
-        list.add(
+      // if(pets[i].newest){
+       list.add(
           PetWidget(
             pet: pets[i], 
             index: i
           )
         );
-      }
-    }
+      // }
+     }
     return list;
   }
 
