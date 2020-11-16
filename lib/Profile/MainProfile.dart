@@ -54,6 +54,9 @@ class _MainProfileState extends State<MainProfile> {
           : ListView(
               children: <Widget>[
                 head(),
+                SizedBox(
+                  height: 100,
+                ),
                 Divider(
                   thickness: 0.8,
                 ),
@@ -69,23 +72,39 @@ class _MainProfileState extends State<MainProfile> {
     );
   }
 
+
   Widget head() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      child: Stack(
+        overflow: Overflow.visible,
+        alignment: Alignment.center,
         children: <Widget>[
-          Center(
-            child: CircleAvatar(
-              radius: 50,
-              backgroundImage: NetworkImage(imageUrl+user.user_picture),
-            ),
+          Image(
+              height: MediaQuery.of(context).size.height/4,
+              fit: BoxFit.cover,
+              image :AssetImage('assets/cover2.jpg')),
+          Positioned(
+            top: 130,
+            child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(blurRadius: 10, color: Colors.black, spreadRadius: 5)
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 80,
+                  backgroundImage: NetworkImage(imageUrl+user.user_picture),
+                )),
+
           ),
+
         ],
       ),
     );
   }
-
   Widget otherDetails(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),

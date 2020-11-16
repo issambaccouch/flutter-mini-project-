@@ -85,9 +85,16 @@ class _AddPetState extends State<AddPet> {
             imageField(),
             pet_nameTextField(),
             pet_ageTextField(),
-            Expanded(child:  pet_raceTextField()),
-            Expanded(child:  pet_statusTextField()),
-            Expanded(child:  pet_sexTextField()),
+            Row(children: [
+              Expanded(child:  pet_raceTextField()),
+            ],),
+            Row(children: [
+              Expanded(child:  pet_statusTextField()),
+            ],),
+            Row(children: [
+              Expanded(child:  pet_sexTextField()),
+            ],),
+         
             pet_descTextField(),
             SizedBox(
               height: 20,
