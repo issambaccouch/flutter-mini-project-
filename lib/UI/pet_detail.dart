@@ -5,7 +5,6 @@ import 'package:flutter_app/Model/user.dart';
 import 'package:flutter_app/Pages/HomePage.dart';
 import 'package:flutter_app/Profile/Userdetail.dart';
 import 'package:flutter_app/UI/data.dart';
-import 'package:flutter_dialogs/flutter_dialogs.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,20 +27,24 @@ class _PetDetailState extends State<PetDetail> {
   int currentuserid ;
   NetworkHandler networkHandler = NetworkHandler();
    var imageUrl = "http://10.0.2.2:3000/petrescue/public/img/";
-    var user = [] ;
-  _getUser() async{
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    currentuserid =  sharedPreferences.getInt("user_id");
+      User  user = new User(user_phonenumber: "0",user_address: "0",user_picture: "don.jpg",user_email: "email",user_username: "fefef") ;
+    _getSharedper()async {
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      currentuserid =  sharedPreferences.getInt("user_id");
+    }
+  _getUser() {
     networkHandler.getUser(pet.owner).then((response) {
-      setState(() {
-      var   res =  jsonDecode(response.body);
-        user =  res.map((model) => User.fromJson(model)).toList();
-      });
+      if(response.statusCode == 200 || response.statusCode == 201 ){
+        var   res =  jsonDecode(response.body);
+        var userone =  res.map((model) => User.fromJson(model)).toList();
+        user = userone[0];
+      }
     });
   }
   initState() {
     super.initState();
     _getUser();
+    _getSharedper();
   }
   @override
   Widget build(BuildContext context) {
@@ -78,7 +81,6 @@ class _PetDetailState extends State<PetDetail> {
           Expanded(
             child: Stack(
               children: [
-
                 Hero(
                   tag: pet.pet_picture,
                   child: Container(
@@ -104,7 +106,6 @@ class _PetDetailState extends State<PetDetail> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Padding(
                   padding: EdgeInsets.all(16),
                   child: Row(
@@ -311,7 +312,7 @@ class _PetDetailState extends State<PetDetail> {
                               ),
 
                               Text(
-                               user[0]?.user_username,
+                               user?.user_username,
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -352,7 +353,7 @@ class _PetDetailState extends State<PetDetail> {
                               onTap: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => UserDetail(petowner: user[0])),
+                                  MaterialPageRoute(builder: (context) => UserDetail(petowner: user)),
                                 );
                               },
                             ),
@@ -441,7 +442,7 @@ class _PetDetailState extends State<PetDetail> {
           color: Colors.white,
         ),
         image: DecorationImage(
-          image: NetworkImage(imageUrl+user[0]?.user_picture),
+          image: NetworkImage(imageUrl+user.user_picture),
           fit: BoxFit.cover,
         ),
         boxShadow: [
