@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/NetworkHandler.dart';
 import 'package:flutter_app/Pages/HomePage.dart';
+import 'package:flutter_app/Pushnotification/push_nofitications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:logger/logger.dart';
 import 'package:smart_select/smart_select.dart';
@@ -10,6 +12,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 
 
 class AddPet extends StatefulWidget {
@@ -20,15 +24,22 @@ class AddPet extends StatefulWidget {
 }
 
 class _AddPetState extends State<AddPet> {
+  @override
+  void initState() {
+    super.initState();
+  }
   var log = Logger();
   final String nodejsendPoint = 'http://10.0.2.2:3000/petrescue/pet/upload';
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   TextEditingController _petameController = TextEditingController();
   TextEditingController _petageController = TextEditingController();
   TextEditingController _petdescController = TextEditingController();
   File _image;
-  String _race = '' ;
-  String _sex = '' ;
-  String _status = '' ;
+  String _race = '';
+
+  String _sex = '';
+
+  String _status = '';
 
   List<S2Choice<String>> pet_racechoices = [
     S2Choice<String>(value: 'cat', title: 'Cat'),
@@ -53,6 +64,7 @@ class _AddPetState extends State<AddPet> {
   ImagePicker _picker = ImagePicker();
   PickedFile _imageFile;
   IconData iconphoto = Icons.image;
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -63,53 +75,53 @@ class _AddPetState extends State<AddPet> {
           currentFocus.unfocus();
         }
       },
-    child : Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white54,
-        elevation: 0,
-        leading: IconButton(
-            icon: Icon(
-              Icons.clear,
-              color: Colors.black,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            }),
-        actions: <Widget>[
-        ],
-      ),
-      body: Form(
-        key: _globalkey,
-        child: ListView(
-          children: <Widget>[
-            imageField(),
-            pet_nameTextField(),
-            pet_ageTextField(),
-            Row(children: [
-              Expanded(child:  pet_raceTextField()),
-            ],),
-            Row(children: [
-              Expanded(child:  pet_statusTextField()),
-            ],),
-            Row(children: [
-              Expanded(child:  pet_sexTextField()),
-            ],),
-         
-            pet_descTextField(),
-            SizedBox(
-              height: 20,
-            ),
-            addButton(),
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.white54,
+          elevation: 0,
+          leading: IconButton(
+              icon: Icon(
+                Icons.clear,
+                color: Colors.black,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
+          actions: <Widget>[
           ],
         ),
+        body: Form(
+          key: _globalkey,
+          child: ListView(
+            children: <Widget>[
+              imageField(),
+              pet_nameTextField(),
+              pet_ageTextField(),
+              Row(children: [
+                Expanded(child: pet_raceTextField()),
+              ],),
+              Row(children: [
+                Expanded(child: pet_statusTextField()),
+              ],),
+              Row(children: [
+                Expanded(child: pet_sexTextField()),
+              ],),
+
+              pet_descTextField(),
+              SizedBox(
+                height: 20,
+              ),
+              addButton(),
+            ],
+          ),
+        ),
       ),
-    ),
     );
   }
 
   Widget imageField() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10, ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10,),
       child: Column(
         children: <Widget>[
           SizedBox(
@@ -148,9 +160,10 @@ class _AddPetState extends State<AddPet> {
             ),
           )
         ],
-    ),
+      ),
     );
   }
+
   Widget pet_nameTextField() {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -183,6 +196,7 @@ class _AddPetState extends State<AddPet> {
       ),
     );
   }
+
   Widget pet_ageTextField() {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -216,6 +230,7 @@ class _AddPetState extends State<AddPet> {
       ),
     );
   }
+
   Widget pet_raceTextField() {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -233,18 +248,20 @@ class _AddPetState extends State<AddPet> {
           color: Colors.blueGrey[400],
           brightness: Brightness.dark,
         ),
-        tileBuilder: (context, state) => S2Tile.fromState(
-          state,
-          isTwoLine: true,
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.pets),
-          ),
-        ),
+        tileBuilder: (context, state) =>
+            S2Tile.fromState(
+              state,
+              isTwoLine: true,
+              leading: Container(
+                width: 40,
+                alignment: Alignment.center,
+                child: const Icon(Icons.pets),
+              ),
+            ),
       ),
     );
   }
+
   Widget pet_statusTextField() {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -262,18 +279,20 @@ class _AddPetState extends State<AddPet> {
           color: Colors.blueGrey[400],
           brightness: Brightness.dark,
         ),
-        tileBuilder: (context, state) => S2Tile.fromState(
-          state,
-          isTwoLine: true,
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.find_replace),
-          ),
-        ),
+        tileBuilder: (context, state) =>
+            S2Tile.fromState(
+              state,
+              isTwoLine: true,
+              leading: Container(
+                width: 40,
+                alignment: Alignment.center,
+                child: const Icon(Icons.find_replace),
+              ),
+            ),
       ),
     );
   }
+
   Widget pet_sexTextField() {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -291,18 +310,20 @@ class _AddPetState extends State<AddPet> {
           color: Colors.blueGrey[400],
           brightness: Brightness.dark,
         ),
-        tileBuilder: (context, state) => S2Tile.fromState(
-          state,
-          isTwoLine: true,
-          leading: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: const Icon(Icons.add_circle),
-          ),
-        ),
+        tileBuilder: (context, state) =>
+            S2Tile.fromState(
+              state,
+              isTwoLine: true,
+              leading: Container(
+                width: 40,
+                alignment: Alignment.center,
+                child: const Icon(Icons.add_circle),
+              ),
+            ),
       ),
     );
   }
+
   Widget pet_descTextField() {
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -336,10 +357,13 @@ class _AddPetState extends State<AddPet> {
       ),
     );
   }
+
   Widget addButton() {
     return InkWell(
       onTap: () async {
-        if (_globalkey.currentState.validate() && _sex != "" && _race != ""&& _status != "" && _image !=  null ) {
+         nh.sendAndRetrieveMessage();
+        if (_globalkey.currentState.validate() && _sex != "" && _race != "" &&
+            _status != "" && _image != null) {
           Map<String, String> data = {
             "pet_name": _petameController.text,
             "pet_age": _petageController.text,
@@ -347,15 +371,23 @@ class _AddPetState extends State<AddPet> {
             "pet_race": _race,
             "pet_sex": _sex,
             "pet_status": _status,
-            "pet_picture": _image.path.split("/").last
+            "pet_picture": _image.path
+                .split("/")
+                .last
           };
           var response =
-          await nh.addpet(data["pet_name"], data["pet_race"], data["pet_age"],
-              data["pet_status"], data["pet_desc"], data["pet_sex"],data["pet_picture"]);
+          await nh.addpet(
+              data["pet_name"],
+              data["pet_race"],
+              data["pet_age"],
+              data["pet_status"],
+              data["pet_desc"],
+              data["pet_sex"],
+              data["pet_picture"]);
           if (response.statusCode == 200 || response.statusCode == 201) {
-            nh.addImage(nodejsendPoint, _image.path) ;
+            nh.addImage(nodejsendPoint, _image.path);
             log.i(_image.path);
-            nh.addImage(nodejsendPoint, _image.path) ;
+            nh.addImage(nodejsendPoint, _image.path);
             Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
@@ -392,25 +424,29 @@ class _AddPetState extends State<AddPet> {
               borderRadius: BorderRadius.circular(10), color: Colors.teal),
           child: Center(
               child: Text(
-            "Add Pet",
-            style: TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-          )),
+                "Add Pet",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
+              )),
         ),
       ),
     );
   }
-  void _upload()  {
+
+  void _upload() {
     if (_image == null) return;
     log.i(_image);
     http.post(nodejsendPoint, body: {
-      "avatar":  _image,
+      "avatar": _image,
     }).then((res) {
       print(res.statusCode);
     }).catchError((err) {
       print(err);
     });
   }
+
   _imgFromCamera() async {
     File image = await ImagePicker.pickImage(
         source: ImageSource.camera, imageQuality: 50
@@ -422,7 +458,7 @@ class _AddPetState extends State<AddPet> {
   }
 
   _imgFromGallery() async {
-    File image = await  ImagePicker.pickImage(
+    File image = await ImagePicker.pickImage(
         source: ImageSource.gallery, imageQuality: 50
     );
 
@@ -430,6 +466,7 @@ class _AddPetState extends State<AddPet> {
       _image = image;
     });
   }
+
   void takeCoverPhoto() async {
     final coverPhoto = await _picker.getImage(source: ImageSource.gallery);
     setState(() {
@@ -437,6 +474,7 @@ class _AddPetState extends State<AddPet> {
       iconphoto = Icons.check_box;
     });
   }
+
   void _showPicker(context) {
     showModalBottomSheet(
         context: context,
@@ -467,4 +505,7 @@ class _AddPetState extends State<AddPet> {
         }
     );
   }
+
+
+
 }

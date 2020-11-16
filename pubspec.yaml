@@ -37,6 +37,7 @@ dependencies:
   smart_select: ^4.3.2
   url_launcher:
   flutter_dialogs: ^1.1.0
+  firebase_messaging: ^7.0.3
 
 
 

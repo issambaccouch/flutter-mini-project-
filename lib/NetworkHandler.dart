@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/sharedPref.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -8,9 +10,48 @@ import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NetworkHandler {
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+  final String serverToken = 'AAAAnrQOMvA:APA91bE2w6DuPHS2Dm-jRPnWUFP66SqA5UJUqHgyDgAv1k2hI13IaiLz4kn9QWf2XnrTS_uGi2gIx2Kh1ZygqD-ifH3YaRyaCew0zp0IdKiw2-gXbvmT_-ce0FHygwNuSSEcULJPQbZ6';
   String baseurl = "http://10.0.2.2:3000/petrescue";
-    var log = Logger();
+  var log = Logger();
+  Future<Map<String, dynamic>> sendAndRetrieveMessage() async {
+   print(await firebaseMessaging.getToken()) ;
+    await firebaseMessaging.requestNotificationPermissions(
+      const IosNotificationSettings(sound: true, badge: true, alert: true, provisional: false),
+    );
+    await http.post(
+      'https://fcm.googleapis.com/fcm/send',
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'key=$serverToken',
+      },
+      body: jsonEncode(
+        <String, dynamic>{
+          'notification': <String, dynamic>{
+            'body': 'Pet need your help',
+            'title': 'Pet Added'
+          },
+          'priority': 'high',
+          'data': <String, dynamic>{
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'id': '1',
+            'status': 'done'
+          },
+          'to': "fJ-KZ2opRn6T_8NBIGOLwJ:APA91bFpNGTyAXFXon_t_9YsRiUPBGJiIevJo23cwnFnQpUEbT5OXK79RzvxHTOrzTXpvFddEp-EgpFuZO1DwQMrRGFMLCowKUuPhPKb1HpuO6eXZrh1nWyrXvnSYbZP32K3yabyY8Y6",
+        },
+      ),
+    );
+    final Completer<Map<String, dynamic>> completer =
+    Completer<Map<String, dynamic>>();
 
+    firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        completer.complete(message);
+      },
+    );
+
+    return completer.future;
+  }
   Future get(String url) async {
     var response = await http.get(url);
     if (response.statusCode == 200 || response.statusCode == 201) {
