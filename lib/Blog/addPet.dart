@@ -82,7 +82,7 @@ class _AddPetState extends State<AddPet> {
         key: _globalkey,
         child: ListView(
           children: <Widget>[
-            titleTextField(),
+            imageField(),
             pet_nameTextField(),
             pet_ageTextField(),
             Expanded(child:  pet_raceTextField()),
@@ -100,7 +100,7 @@ class _AddPetState extends State<AddPet> {
     );
   }
 
-  Widget titleTextField() {
+  Widget imageField() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10, ),
       child: Column(

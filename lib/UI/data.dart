@@ -21,7 +21,7 @@ class Pet {
       this.pet_status, this.pet_desc, this.pet_sex, this.createdAt, this.owner);
 
   Pet.fromJson(Map<String, dynamic> json)
-      : pet_id = json['id'],
+      : pet_id = json['pet_id'],
         pet_name = json['pet_name'],
         pet_picture = json['pet_picture'],
         pet_race = json['pet_race'],
@@ -32,7 +32,7 @@ class Pet {
         owner = json['owner'],
         pet_age = json['pet_age'];
   Map toJason(){
-    return {'id':pet_id,'pet_name':pet_name,
+    return {'pet_id':pet_id,'pet_name':pet_name,
       'pet_picture':pet_picture, 'pet_race':pet_race,
       'pet_status':pet_status, 'pet_desc':pet_desc,
       'pet_sex':pet_sex, 'createdAt':createdAt,

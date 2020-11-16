@@ -26,7 +26,10 @@ class NetworkHandler {
     return http.get(url) ;
     }
 
-
+  Future deletePet(pet_id) {
+    var url = "http://10.0.2.2:3000/petrescue/mypets/$pet_id";
+    return http.delete(url);
+  }
 
    Future getPets() {
     var url = "http://10.0.2.2:3000/petrescue/pets";
@@ -35,17 +38,19 @@ class NetworkHandler {
 
   Future <http.Response>login(email , password) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
-
     final response = await http.get("$baseurl/user/$email/$password");
     if(response.statusCode == 200 || response.statusCode == 201 ){
       var jsonData =  json.decode(response.body);
       sharedPreferences.setString('user_email', jsonData[0]["user_email"]);
       sharedPreferences.setString('user_username', jsonData[0]["user_username"]);
       sharedPreferences.setInt('user_id', jsonData[0]["user_id"]);
+      sharedPreferences.setString('user_picture', jsonData[0]["user_picture"]);
+      sharedPreferences.setString('user_address', jsonData[0]["user_address"]);
+      sharedPreferences.setString('user_phonenumber', jsonData[0]["user_phonenumber"]);
     }
     return response ;
     }
-  Future <http.Response> register(username ,email ,password) async {
+  Future <http.Response> register(username ,email ,password,phone,adress,picture) async {
    var url = "$baseurl/signup" ;
    log.i(url) ;
     var response = await http.post(
@@ -56,8 +61,10 @@ class NetworkHandler {
       body: json.encode(<String , String>{
           'user_username':username,
           'user_email':email,
-          'password':password
-
+          'password':password,
+          'user_picture':picture ,
+          'user_address':adress ,
+          'user_phonenumber':phone ,
       }
 
 
@@ -89,6 +96,7 @@ class NetworkHandler {
       }
       ),
     );
+
     return response;
   }
 
@@ -115,9 +123,4 @@ class NetworkHandler {
     return response;
   }
 
-
-  NetworkImage getImage(String username) {
-    String url = ("/uploads//$username.jpg");
-    return NetworkImage(url);
-  }
 }

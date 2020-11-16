@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import "package:flutter/material.dart";
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../NetworkHandler.dart';
 import 'HomePage.dart';
@@ -15,12 +17,18 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final String nodejsendPoint = 'http://10.0.2.2:3000/petrescue/pet/upload';
+
+  File _image;
   bool vis = true;
   final _globalkey = GlobalKey<FormState>();
   NetworkHandler networkHandler = NetworkHandler();
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
+  TextEditingController _adressController = TextEditingController();
+
   String errorText;
   bool validate = false;
   bool circular = false;
@@ -42,11 +50,10 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         child: Form(
           key: _globalkey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+          child: ListView(
+            children:  <Widget>[
               Text(
-                "Sign up with email",
+                " Sign up",
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
@@ -56,9 +63,14 @@ class _SignUpPageState extends State<SignUpPage> {
               SizedBox(
                 height: 20,
               ),
+
+              imageField(),
               usernameTextField(),
               emailTextField(),
               passwordTextField(),
+              phoneField(),
+              adressTextField(),
+
               SizedBox(
                 height: 20,
               ),
@@ -73,14 +85,18 @@ class _SignUpPageState extends State<SignUpPage> {
                       "username": _usernameController.text,
                       "email": _emailController.text,
                       "password": _passwordController.text,
+                      "phone": _phoneController.text,
+                      "adress": _adressController.text,
+                      "picture" :_image.path.split("/").last
                     };
                     print(data);
                     var responseRegister =
-                    await networkHandler.register(data["username"],data["email"],data["password"]);
+                    await networkHandler.register(data["username"],data["email"],data["password"],data["phone"],data["adress"],data["picture"]);
 
                     //Login Logic added here
                     if (responseRegister.statusCode == 200 ||
                         responseRegister.statusCode == 201) {
+                      networkHandler.addImage(nodejsendPoint, _image.path) ;
                       Map<String, String> data = {
                         "email": _emailController.text,
                         "password": _passwordController.text,
@@ -156,7 +172,50 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
 
-
+  Widget imageField() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10, ),
+      child: Column(
+        children: <Widget>[
+          SizedBox(
+            height: 10,
+          ),
+          Center(
+            child: GestureDetector(
+              onTap: () {
+                _showPicker(context);
+              },
+              child: CircleAvatar(
+                radius: 55,
+                backgroundColor: Color(0xffFDCF09),
+                child: _image != null
+                    ? ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.file(
+                    _image,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.fitHeight,
+                  ),
+                )
+                    : Container(
+                  decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(50)),
+                  width: 100,
+                  height: 100,
+                  child: Icon(
+                    Icons.camera_alt,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
   Widget usernameTextField() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
@@ -179,7 +238,28 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
-
+  Widget phoneField() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
+      child: Column(
+        children: [
+          Text("Phone"),
+          TextFormField(
+            controller: _phoneController,
+            decoration: InputDecoration(
+              errorText: validate ? null : errorText,
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.black,
+                  width: 2,
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
   Widget emailTextField() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
@@ -206,6 +286,32 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+  Widget adressTextField() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10.0),
+      child: Column(
+        children: [
+          Text("Adress"),
+          TextFormField(
+            controller: _adressController,
+            validator: (value) {
+              if (value.isEmpty) return "Adress can't be empty";
+              return null;
+            },
+            decoration: InputDecoration(
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(
+                  color: Colors.black,
+                  width: 2,
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
 
   Widget passwordTextField() {
     return Padding(
@@ -246,4 +352,55 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+
+  _imgFromCamera() async {
+    File image = await ImagePicker.pickImage(
+        source: ImageSource.camera, imageQuality: 50
+    );
+
+    setState(() {
+      _image = image;
+    });
+  }
+
+  _imgFromGallery() async {
+    File image = await  ImagePicker.pickImage(
+        source: ImageSource.gallery, imageQuality: 50
+    );
+
+    setState(() {
+      _image = image;
+    });
+  }
+  void _showPicker(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: new Wrap(
+                children: <Widget>[
+                  new ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Photo Library'),
+                      onTap: () {
+                        _imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  new ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () {
+                      _imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+    );
+  }
 }
+

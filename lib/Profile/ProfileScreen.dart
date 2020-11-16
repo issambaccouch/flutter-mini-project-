@@ -1,3 +1,4 @@
+import 'package:flutter_app/Model/user.dart';
 import 'package:flutter_app/NetworkHandler.dart';
 import 'package:flutter_app/Profile/CreatProfile.dart';
 import 'package:flutter/material.dart';
@@ -25,9 +26,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void checkProfile() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
     var username = sharedPreferences.getString("user_username");
+     var  email = sharedPreferences.getString("user_email");
+      var userpicture  = sharedPreferences.getString('user_picture');
+     var  useradress = sharedPreferences.getString('user_address');
+      var userphonenumber = sharedPreferences.getString('user_phonenumber');
+       User user = new User(user_username: username, user_email: email,user_picture: userpicture,user_address: useradress,user_phonenumber: userphonenumber);
     if (username != null) {
       setState(() {
-        page = MainProfile();
+        page = MainProfile(user : user);
       });
     } else {
       setState(() {

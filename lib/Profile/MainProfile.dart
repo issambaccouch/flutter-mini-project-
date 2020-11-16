@@ -1,41 +1,36 @@
-import 'dart:developer';
 
-import 'package:flutter_app/Model/profileModel.dart';
-import 'package:flutter_app/NetworkHandler.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Model/user.dart';
+import 'package:flutter_app/Pages/HomePage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logger/logger.dart';
+import 'package:url_launcher/url_launcher.dart' as UrlLauncher;
 
 class MainProfile extends StatefulWidget {
-  MainProfile({Key key}) : super(key: key);
+   final User user ;
+  MainProfile({Key key,@required this.user}) : super(key: key);
 
   @override
-  _MainProfileState createState() => _MainProfileState();
+  _MainProfileState createState() => _MainProfileState(user);
 }
 
 class _MainProfileState extends State<MainProfile> {
-  var log = Logger();
-  bool circular = true;
-  NetworkHandler networkHandler = NetworkHandler();
-  ProfileModel profileModel = ProfileModel();
+  final User user ;
+  _MainProfileState(this.user);
+  bool circular = false;
+  var imageUrl = "http://10.0.2.2:3000/petrescue/public/img/";
+  String email = "";
+  String username = "";
+  String userpicture  = "";
+  String useradress = "";
+  String  userphonenumber = "";
   @override
   void initState() {
     super.initState();
 
-    fetchData();
   }
 
-  void fetchData() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
-    var email = sharedPreferences.getString("user_email");
-    log.i(email);
-    var response = await networkHandler.get("http://10.0.2.2:3000/petrescue/user/email/$email");
-    log.i(response);
-    setState(() {
-      profileModel = ProfileModel.fromJson(response[0]);
-      circular = false;
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,18 +38,16 @@ class _MainProfileState extends State<MainProfile> {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.white10,
-        // leading: IconButton(
-        //   icon: Icon(Icons.arrow_back),
-        //   onPressed: () {},
-        //   color: Colors.black,
-        // ),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () {},
-            color: Colors.black,
-          ),
-        ],
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => HomePage()),
+            );
+          },
+          color: Colors.black,
+        ),
       ),
       body: circular
           ? Center(child: CircularProgressIndicator())
@@ -64,9 +57,10 @@ class _MainProfileState extends State<MainProfile> {
                 Divider(
                   thickness: 0.8,
                 ),
-                otherDetails("email", profileModel.user_email),
-                otherDetails("username", profileModel.user_username),
-
+                otherDetails("@username", user.user_username),
+                otherDetails("email", user.user_email),
+                otherDetails("Address", user.user_address),
+                otherDetails("Phone", user.user_phonenumber),
                 Divider(
                   thickness: 0.8,
                 ),
@@ -84,17 +78,9 @@ class _MainProfileState extends State<MainProfile> {
           Center(
             child: CircleAvatar(
               radius: 50,
-              backgroundImage: NetworkHandler().getImage(profileModel.user_username),
+              backgroundImage: NetworkImage(imageUrl+user.user_picture),
             ),
           ),
-          Text(
-            profileModel.user_username,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Text(profileModel.user_email)
         ],
       ),
     );
@@ -124,4 +110,5 @@ class _MainProfileState extends State<MainProfile> {
       ),
     );
   }
+
 }

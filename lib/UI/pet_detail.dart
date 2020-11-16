@@ -1,12 +1,14 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Model/profileModel.dart';
 import 'package:flutter_app/Model/user.dart';
+import 'package:flutter_app/Pages/HomePage.dart';
+import 'package:flutter_app/Profile/Userdetail.dart';
 import 'package:flutter_app/UI/data.dart';
-import 'package:flutter_app/UI/user_avatar.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_dialogs/flutter_dialogs.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../NetworkHandler.dart';
 
@@ -19,13 +21,17 @@ class PetDetail extends StatefulWidget {
 
 }
 class _PetDetailState extends State<PetDetail> {
+  var log = Logger();
 
   final Pet pet;
   _PetDetailState(this.pet);
+  int currentuserid ;
   NetworkHandler networkHandler = NetworkHandler();
    var imageUrl = "http://10.0.2.2:3000/petrescue/public/img/";
     var user = [] ;
-  _getUser() {
+  _getUser() async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    currentuserid =  sharedPreferences.getInt("user_id");
     networkHandler.getUser(pet.owner).then((response) {
       setState(() {
       var   res =  jsonDecode(response.body);
@@ -136,7 +142,7 @@ class _PetDetailState extends State<PetDetail> {
                               ),
 
                               Text(
-                                pet.createdAt,
+                                pet.createdAt.substring(0,10),
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -162,21 +168,67 @@ class _PetDetailState extends State<PetDetail> {
                         ],
                       ),
 
-                      Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.red[400],
-                          // color: pet.favorite ? Colors.red[400] : Colors.white,
-                        ),
-                        child: Icon(
-                          Icons.favorite,
-                          size: 24,
-                          color: Colors.white,
-                          // color: pet.favorite ? Colors.white : Colors.grey[300],
-                        ),
-                      ),
+                     InkWell(
+                       child:Container(
+                         height: 50,
+                         width: 50,
+                         decoration: BoxDecoration(
+                           shape: BoxShape.circle,
+                           color: Colors.red[400],
+                           // color: pet.favorite ? Colors.red[400] : Colors.white,
+                         ),
+                         child: pet.owner == currentuserid? Icon(
+                           Icons.delete_forever,
+                           size: 36,
+                           color: Colors.white,
+                           // color: pet.favorite ? Colors.white : Colors.grey[300],
+                         ):Icon(
+                           Icons.favorite,
+                           size: 24,
+                           color: Colors.white,
+                           // color: pet.favorite ? Colors.white : Colors.grey[300],
+                         ),
+                       ) ,
+                       onTap: () {
+                         print("pressed");
+                         showDialog<void>(
+                           context: context,
+                           barrierDismissible: false, // user must tap button!
+                           builder: (BuildContext context) {
+                             return AlertDialog(
+                               title: Text('Delete this Pet'),
+                               content: SingleChildScrollView(
+                                 child: ListBody(
+                                   children: <Widget>[
+                                     Text('you are going to delete this pet '),
+                                     Text('Are you sure?'),
+                                   ],
+                                 ),
+                               ),
+                               actions: <Widget>[
+                                 TextButton(
+                                   child: Text('Approve'),
+                                   onPressed: () {
+                                     print("deleted") ;
+                                     deletePet(pet.pet_id);
+                                     Navigator.push(
+                                       context,
+                                       MaterialPageRoute(builder: (context) => HomePage()),
+                                     );
+                                   },
+                                 ),
+                                 TextButton(
+                                   child: Text('Cancel'),
+                                   onPressed: () {
+                                     Navigator.of(context).pop();
+                                   },
+                                 ),
+                               ],
+                             );
+                           },
+                         );
+                       }
+                     ) ,
 
                     ],
                   ),
@@ -259,7 +311,7 @@ class _PetDetailState extends State<PetDetail> {
                               ),
 
                               Text(
-                               user[0].user_username,
+                               user[0]?.user_username,
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -271,33 +323,39 @@ class _PetDetailState extends State<PetDetail> {
 
                         ],
                       ),
-
-                      Container(
-                        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(20),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue[300].withOpacity(0.5),
-                              spreadRadius: 3,
-                              blurRadius: 5,
-                              offset: Offset(0, 0),
+                            InkWell(
+                               child:Container(
+                                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(20),
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.blue[300].withOpacity(0.5),
+                                        spreadRadius: 3,
+                                        blurRadius: 5,
+                                        offset: Offset(0, 0),
+                                      ),
+                                    ],
+                                    color: Colors.blue[300],
+                                  ),
+                                  child: Text(
+                                    "Contact Me",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => UserDetail(petowner: user[0])),
+                                );
+                              },
                             ),
-                          ],
-                          color: Colors.blue[300],
-                        ),
-                        child: Text(
-                          "Contact Me",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-
                     ],
                   ),
                 ),
@@ -355,7 +413,47 @@ class _PetDetailState extends State<PetDetail> {
       ),
     );
   }
-
-
+ deletePet(pet_id){
+    print(pet_id);
+   networkHandler.deletePet(pet_id).then((response) {
+     if(response.statusCode == 200 || response.statusCode == 201 ){
+       Fluttertoast.showToast(
+           msg: "Pet Deleted 😭",
+           toastLength: Toast.LENGTH_SHORT,
+           gravity: ToastGravity.CENTER,
+           timeInSecForIosWeb: 1,
+           backgroundColor: Colors.red,
+           textColor: Colors.white,
+           fontSize: 16.0
+       );
+     }
+   });
+ }
+   UserAvatar() {
+    return Container(
+      height: 60,
+      width: 60,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(
+          width: 3,
+          color: Colors.white,
+        ),
+        image: DecorationImage(
+          image: NetworkImage(imageUrl+user[0]?.user_picture),
+          fit: BoxFit.cover,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 3,
+            blurRadius: 5,
+            offset: Offset(0, 0),
+          ),
+        ],
+      ),
+    );
+  }
 
 }

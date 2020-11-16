@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter_app/Blog/addPet.dart';
 import 'package:flutter_app/Pages/WelcomePage.dart';
 import 'package:flutter_app/Screen/HomeScreen.dart';
 import 'package:flutter_app/Profile/ProfileScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/UI/data.dart';
+import 'package:flutter_app/UI/mypet_list.dart';
 import 'package:flutter_app/UI/principal.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_app/NetworkHandler.dart';
@@ -17,6 +21,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var imageUrl = "http://10.0.2.2:3000/petrescue/public/img/";
+  var pets = new List<Pet>();
+  _getPets() {
+    networkHandler.getPets().then((response) {
+      setState(() {
+        Iterable res =  json.decode(response.body);
+        pets = res.map((model) => Pet.fromJson(model)).toList();
+      });
+    });
+  }
   var log = Logger();
   int currentState = 0;
   List<Widget> widgets = [Principal(), ProfileScreen()];
@@ -24,6 +38,8 @@ class _HomePageState extends State<HomePage> {
   final storage = FlutterSecureStorage();
   NetworkHandler networkHandler = NetworkHandler();
   String username = "";
+  String userpicture = "" ;
+  int currentuserid ;
 
   Widget profilePhoto = Container(
     height: 100,
@@ -39,11 +55,15 @@ class _HomePageState extends State<HomePage> {
     // TODO: implement initState
     super.initState();
     checkProfile();
+    _getPets();
+
   }
 
   void checkProfile() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance() ;
      username = sharedPreferences.getString("user_username");
+     userpicture = sharedPreferences.getString("user_picture");
+      currentuserid = sharedPreferences.getInt("user_id");
      log.i(username);
     setState(() {
       username = username;
@@ -52,7 +72,7 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         profilePhoto = CircleAvatar(
           radius: 50,
-          backgroundImage: NetworkImage('https://cdnb.artstation.com/p/assets/images/images/015/774/565/large/basma-shaaban-c3499476007843-5c5cad115bc79.jpg?1549581474') ,
+          backgroundImage: NetworkImage(imageUrl+userpicture) ,
         );
       });
     } else {
@@ -87,27 +107,39 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
-              title: Text("All Post"),
-              trailing: Icon(Icons.launch),
-              onTap: () {},
+              title: Text("Home" ,style: TextStyle(fontWeight: FontWeight.bold)),
+              trailing: Icon(Icons.home),
+              onTap: () {
+               Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => HomePage()));
+              },
             ),
             ListTile(
-              title: Text("New Story"),
+              title: Text("Add new Pet ",style: TextStyle(fontWeight: FontWeight.bold)),
               trailing: Icon(Icons.add),
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => AddPet()));},
             ),
             ListTile(
-              title: Text("Settings"),
-              trailing: Icon(Icons.settings),
-              onTap: () {},
+              title: Text("My Pets", style: TextStyle(fontWeight: FontWeight.bold)),
+              trailing: Icon(Icons.pets),
+              onTap: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (context) => MypetList(currentuser: currentuserid, pets: pets)));
+              },
             ),
             ListTile(
-              title: Text("Feedback"),
-              trailing: Icon(Icons.feedback),
-              onTap: () {},
+              title: Text("View Profile" ,style: TextStyle(fontWeight: FontWeight.bold)),
+              trailing: Icon(Icons.person),
+              onTap: () {
+                 Navigator.of(context)
+                   .push(MaterialPageRoute(builder: (context) => ProfileScreen()));
+              },
             ),
+
             ListTile(
-              title: Text("Logout"),
+              title: Text("Logout" , style: TextStyle(fontWeight: FontWeight.bold)),
               trailing: Icon(Icons.power_settings_new),
               onTap: logout,
             ),

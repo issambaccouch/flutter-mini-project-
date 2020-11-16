@@ -35,6 +35,8 @@ dependencies:
   fluttertoast: ^7.1.1
   shared_preferences:
   smart_select: ^4.3.2
+  url_launcher:
+  flutter_dialogs: ^1.1.0
 
 
 
