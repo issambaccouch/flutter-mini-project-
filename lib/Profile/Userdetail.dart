@@ -1,6 +1,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/Model/user.dart';
 import 'package:flutter_app/NetworkHandler.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +51,9 @@ class _UserDetailState extends State<UserDetail> {
           Divider(
             thickness: 0.8,
           ),
+          SizedBox(
+            height: 50,
+          ),
           otherDetails("username", petowner.user_username),
           sendemail("email", petowner.user_email),
           otherDetails("Adress", petowner.user_address),
@@ -64,20 +68,32 @@ class _UserDetailState extends State<UserDetail> {
 
   Widget head() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+      child: Stack(
+        overflow: Overflow.visible,
+        alignment: Alignment.center,
         children: <Widget>[
-          Center(
-            child: CircleAvatar(
-              radius: 50,
+         Image(
+              height: MediaQuery.of(context).size.height/4,
+             fit: BoxFit.cover,
+             image :AssetImage('assets/cover.jpg')),
+          Positioned(
+            top: 100,
+           child: Container(
+               decoration: BoxDecoration(
+                 color: Colors.white,
+                 shape: BoxShape.circle,
+                 boxShadow: [
+                   BoxShadow(blurRadius: 10, color: Colors.black, spreadRadius: 5)
+                 ],
+               ),
+                  child: CircleAvatar(
+                radius: 80,
               backgroundImage: NetworkImage(imageUrl+petowner.user_picture),
-            ),
+            )),
 
           ),
-          SizedBox(
-            height: 30,
-          ),
+
         ],
       ),
     );
