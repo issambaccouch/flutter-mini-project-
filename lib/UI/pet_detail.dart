@@ -35,9 +35,12 @@ class _PetDetailState extends State<PetDetail> {
   _getUser() {
     networkHandler.getUser(pet.owner).then((response) {
       if(response.statusCode == 200 || response.statusCode == 201 ){
-        var   res =  jsonDecode(response.body);
-        var userone =  res.map((model) => User.fromJson(model)).toList();
-        user = userone[0];
+        setState(() {
+          var   res =  jsonDecode(response.body);
+          var userone =  res.map((model) => User.fromJson(model)).toList();
+          user = userone[0];
+        });
+
       }
     });
   }
