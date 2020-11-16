@@ -28,8 +28,9 @@ class NetworkHandler {
       body: jsonEncode(
         <String, dynamic>{
           'notification': <String, dynamic>{
-            'body': 'Pet need your help',
-            'title': 'Pet Added'
+            'body': 'a new Pet need your help heros',
+            'title': 'Pet Added',
+            'image': 'https://www.pawsforthesoul.com/wp-content/uploads/2019/03/Pet-Rescue.jpg'
           },
           'priority': 'high',
           'data': <String, dynamic>{
