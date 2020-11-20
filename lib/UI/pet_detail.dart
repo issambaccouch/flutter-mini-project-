@@ -194,43 +194,46 @@ class _PetDetailState extends State<PetDetail> {
                          ),
                        ) ,
                        onTap: () {
+                         if (pet.owner == currentuserid){
+                           showDialog<void>(
+                             context: context,
+                             barrierDismissible: false, // user must tap button!
+                             builder: (BuildContext context) {
+                               return AlertDialog(
+                                 title: Text('Delete this Pet'),
+                                 content: SingleChildScrollView(
+                                   child: ListBody(
+                                     children: <Widget>[
+                                       Text('you are going to delete this pet '),
+                                       Text('Are you sure?'),
+                                     ],
+                                   ),
+                                 ),
+                                 actions: <Widget>[
+                                   TextButton(
+                                     child: Text('Approve'),
+                                     onPressed: () {
+                                       print("deleted") ;
+                                       deletePet(pet.pet_id);
+                                       Navigator.push(
+                                         context,
+                                         MaterialPageRoute(builder: (context) => HomePage()),
+                                       );
+                                     },
+                                   ),
+                                   TextButton(
+                                     child: Text('Cancel'),
+                                     onPressed: () {
+                                       Navigator.of(context).pop();
+                                     },
+                                   ),
+                                 ],
+                               );
+                             },
+                           );
+                         }
                          print("pressed");
-                         showDialog<void>(
-                           context: context,
-                           barrierDismissible: false, // user must tap button!
-                           builder: (BuildContext context) {
-                             return AlertDialog(
-                               title: Text('Delete this Pet'),
-                               content: SingleChildScrollView(
-                                 child: ListBody(
-                                   children: <Widget>[
-                                     Text('you are going to delete this pet '),
-                                     Text('Are you sure?'),
-                                   ],
-                                 ),
-                               ),
-                               actions: <Widget>[
-                                 TextButton(
-                                   child: Text('Approve'),
-                                   onPressed: () {
-                                     print("deleted") ;
-                                     deletePet(pet.pet_id);
-                                     Navigator.push(
-                                       context,
-                                       MaterialPageRoute(builder: (context) => HomePage()),
-                                     );
-                                   },
-                                 ),
-                                 TextButton(
-                                   child: Text('Cancel'),
-                                   onPressed: () {
-                                     Navigator.of(context).pop();
-                                   },
-                                 ),
-                               ],
-                             );
-                           },
-                         );
+
                        }
                      ) ,
 
@@ -328,7 +331,31 @@ class _PetDetailState extends State<PetDetail> {
                         ],
                       ),
                             InkWell(
-                               child:Container(
+                               child: pet.owner == currentuserid?Container(
+                                 padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                                 decoration: BoxDecoration(
+                                   borderRadius: BorderRadius.all(
+                                     Radius.circular(20),
+                                   ),
+                                   boxShadow: [
+                                     BoxShadow(
+                                       color: Colors.blue[300].withOpacity(0.5),
+                                       spreadRadius: 3,
+                                       blurRadius: 5,
+                                       offset: Offset(0, 0),
+                                     ),
+                                   ],
+                                   color: Colors.blue[300],
+                                 ),
+                                 child: Text(
+                                   "Owner",
+                                   style: TextStyle(
+                                     fontSize: 16,
+                                     fontWeight: FontWeight.bold,
+                                     color: Colors.white,
+                                   ),
+                                 ),
+                               ):Container(
                                   padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.all(
@@ -354,10 +381,13 @@ class _PetDetailState extends State<PetDetail> {
                                   ),
                                 ),
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => UserDetail(petowner: user)),
-                                );
+                                 if(pet.owner != currentuserid){
+                                   Navigator.push(
+                                     context,
+                                     MaterialPageRoute(builder: (context) => UserDetail(petowner: user)),
+                                   );
+                                 }
+
                               },
                             ),
                     ],
